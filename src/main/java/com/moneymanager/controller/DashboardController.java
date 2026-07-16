@@ -45,4 +45,19 @@ public class DashboardController {
 
         return "dashboard";
     }
+
+    // YAHAN HUMNE NAYA ACCOUNTS WALA CODE ADD KIYA HAI
+    @GetMapping("/accounts")
+    public String accounts(@AuthenticationPrincipal UserDetails principal, Model model) {
+        User user = userRepository.findByEmail(principal.getUsername())
+                .orElseThrow(() -> new IllegalStateException("Authenticated user not found"));
+
+        // User ke accounts fetch karna
+        List<Account> accounts = accountRepository.findByUserIdAndArchivedFalse(user.getId());
+
+        model.addAttribute("user", user);
+        model.addAttribute("accounts", accounts);
+
+        return "accounts";
+    }
 }
