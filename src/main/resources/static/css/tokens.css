@@ -1,0 +1,42 @@
+/*
+  Design direction: "Ledger" — the app is framed as a physical account book
+  rather than a generic SaaS dashboard. Warm paper background, ink-navy text,
+  a stamped-gold accent for the balance figure, and a monospace face for every
+  amount so digits line up the way they would in a real ledger column.
+*/
+
+:root {
+    /* Color */
+    --paper: #F6F4EE;
+    --paper-raised: #FFFFFF;
+    --ink: #1B2028;
+    --ink-soft: #5B6270;
+    --navy: #14213D;
+    --gold: #B8862E;
+    --gold-soft: #EFE1C3;
+    --green: #1F7A50;
+    --red: #B23B22;
+    --line: #DDD8C9;
+
+    /* Type */
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SFMono-Regular', Menlo, monospace;
+
+    /* Layout */
+    --radius: 6px;
+    --sidebar-width: 240px;
+    --shadow-card: 0 1px 2px rgba(27, 32, 40, 0.06), 0 4px 12px rgba(27, 32, 40, 0.04);
+}
+
+[data-theme="dark"] {
+    --paper: #14171C;
+    --paper-raised: #1C2028;
+    --ink: #EDEBE3;
+    --ink-soft: #9AA0AC;
+    --navy: #EDEBE3;
+    --gold: #D9A64E;
+    --gold-soft: #2B2618;
+    --line: #2C313B;
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
+}

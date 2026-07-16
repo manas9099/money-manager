@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign in — Ledger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="auth-shell">
+    <div class="auth-card">
+        <span class="eyebrow">Money Manager</span>
+        <h1>Welcome back</h1>
+        <p class="sub">Sign in to your ledger.</p>
+
+        <div class="alert alert-success" th:if="${param.registered}">
+            Account created. Sign in below.
+        </div>
+        <div class="alert alert-error" th:if="${param.error}">
+            Incorrect email or password.
+        </div>
+        <div class="alert alert-success" th:if="${param.logout}">
+            You've been signed out.
+        </div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="field">
+                <label for="username">Email</label>
+                <input type="email" id="username" name="username" required autofocus>
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Sign in</button>
+        </form>
+
+        <div class="auth-foot">
+            No account yet? <a th:href="@{/register}">Create one</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

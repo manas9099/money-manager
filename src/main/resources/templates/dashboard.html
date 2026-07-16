@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard — Ledger</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="brand"><span class="brand-mark">₹</span> Ledger</div>
+
+        <div class="nav-group">
+            <span class="nav-label">Overview</span>
+            <a class="nav-item active" th:href="@{/dashboard}">Dashboard</a>
+            <a class="nav-item" href="#">Accounts</a>
+            <a class="nav-item" href="#">Transactions</a>
+        </div>
+
+        <div class="nav-group">
+            <span class="nav-label">Plan</span>
+            <a class="nav-item" href="#">Budgets</a>
+            <a class="nav-item" href="#">Goals</a>
+            <a class="nav-item" href="#">Bills</a>
+        </div>
+
+        <div class="nav-group">
+            <span class="nav-label">Grow</span>
+            <a class="nav-item" href="#">Investments</a>
+            <a class="nav-item" href="#">Loans</a>
+            <a class="nav-item" href="#">Reports</a>
+        </div>
+
+        <div class="nav-group">
+            <span class="nav-label">Account</span>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="nav-item" style="all:unset; cursor:pointer; display:block; padding:8px 10px;">Sign out</button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="page-head">
+            <div>
+                <span class="eyebrow">Good to see you</span>
+                <h1 th:text="${user.fullName}">Name</h1>
+            </div>
+        </div>
+
+        <div class="ledger-stamp">
+            <div class="label">Total balance across accounts</div>
+            <div class="amount" th:text="${#numbers.formatDecimal(totalBalance, 1, 'COMMA', 2, 'POINT')} + ' ' + ${user.defaultCurrency}">0.00</div>
+        </div>
+
+        <div class="grid">
+            <div class="card" th:each="account : ${accounts}">
+                <div class="label" th:text="${account.name}">Account</div>
+                <div class="value mono" th:text="${#numbers.formatDecimal(account.currentBalance, 1, 'COMMA', 2, 'POINT')}">0.00</div>
+            </div>
+            <div class="empty-state" th:if="${accounts.isEmpty()}">
+                No accounts yet. Add your first account to start tracking.
+            </div>
+        </div>
+
+        <h2 class="section-title">Recent transactions</h2>
+        <table class="ledger-table" th:if="${!recentTransactions.isEmpty()}">
+            <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Account</th>
+                <th>Notes</th>
+                <th style="text-align:right;">Amount</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="txn : ${recentTransactions}">
+                <td class="mono" th:text="${#temporals.format(txn.transactionDate, 'dd MMM yyyy')}">01 Jan 2026</td>
+                <td th:text="${txn.category != null ? txn.category.name : '—'}">Category</td>
+                <td th:text="${txn.account.name}">Account</td>
+                <td th:text="${txn.notes ?: '—'}">Notes</td>
+                <td class="amount mono"
+                    th:classappend="${txn.type.name() == 'INCOME'} ? 'income' : (${txn.type.name() == 'EXPENSE'} ? 'expense' : '')"
+                    th:text="${#numbers.formatDecimal(txn.amount, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="empty-state" th:if="${recentTransactions.isEmpty()}">
+            No transactions yet. Once you add one, it'll show up here.
+        </div>
+    </main>
+</div>
+</body>
+</html>
