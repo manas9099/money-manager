@@ -38,37 +38,38 @@ public class TransactionController {
         return "add-transaction";
     }
 
-    @PostMapping("/add")
-    public String saveTransaction(@AuthenticationPrincipal UserDetails principal,
-                                  @ModelAttribute Transaction transaction,
-                                  @RequestParam Long accountId,
-                                  @RequestParam(required = false) Long categoryId) {
-        
-        User user = userRepository.findByEmail(principal.getUsername()).orElseThrow();
-        Account account = accountRepository.findById(accountId).orElseThrow();
-
-        // Transaction object ko manually update karein taaki binding error na ho
-        transaction.setUser(user);
-        transaction.setAccount(account);
-        
-        if (categoryId != null) {
-            transaction.setCategory(categoryRepository.findById(categoryId).orElse(null));
-        } else {
-            transaction.setCategory(null);
-        }
-        
-        transaction.setTransactionDate(LocalDateTime.now());
-
-        // Balance update logic
-        if (transaction.getType() == TransactionType.INCOME) {
-            account.setCurrentBalance(account.getCurrentBalance().add(transaction.getAmount()));
-        } else if (transaction.getType() == TransactionType.EXPENSE) {
-            account.setCurrentBalance(account.getCurrentBalance().subtract(transaction.getAmount()));
-        }
-
-        transactionRepository.save(transaction);
-        accountRepository.save(account);
-
-        return "redirect:/accounts";
+  @PostMapping("/add")
+public String saveTransaction(@AuthenticationPrincipal UserDetails principal,
+                              @ModelAttribute("transaction") Transaction transaction,
+                              @RequestParam Long accountId,
+                              @RequestParam(value = "categoryId", required = false) Long categoryId,
+                              BindingResult result) { // BindingResult add kiya
+    
+    if (result.hasErrors()) {
+        System.out.println("Binding Errors: " + result.getAllErrors()); // Logs mein error dikhega
+        return "redirect:/transactions/add?error";
     }
+
+    User user = userRepository.findByEmail(principal.getUsername()).orElseThrow();
+    Account account = accountRepository.findById(accountId).orElseThrow();
+
+    transaction.setUser(user);
+    transaction.setAccount(account);
+    
+    if (categoryId != null) {
+        transaction.setCategory(categoryRepository.findById(categoryId).orElse(null));
+    }
+    
+    transaction.setTransactionDate(LocalDateTime.now());
+
+    if (transaction.getType() == TransactionType.INCOME) {
+        account.setCurrentBalance(account.getCurrentBalance().add(transaction.getAmount()));
+    } else if (transaction.getType() == TransactionType.EXPENSE) {
+        account.setCurrentBalance(account.getCurrentBalance().subtract(transaction.getAmount()));
+    }
+
+    transactionRepository.save(transaction);
+    accountRepository.save(account);
+
+    return "redirect:/accounts";
 }
