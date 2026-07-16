@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <title>Accounts — Ledger</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .page-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn { padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        .btn-add { background: #28a745; color: white; margin-right: 10px; }
+        .btn-back { background: #eee; color: #333; }
+    </style>
 </head>
 <body>
 <div class="app-shell">
@@ -13,7 +19,12 @@
                 <span class="eyebrow">Manage your money</span>
                 <h1>Your Accounts</h1>
             </div>
-            <a th:href="@{/dashboard}" style="padding: 10px; background: #eee; text-decoration: none; border-radius: 5px;">Back to Dashboard</a>
+            <div>
+                <!-- Add Transaction Button -->
+                <a th:href="@{/transactions/add}" class="btn btn-add">Add Transaction</a>
+                <!-- Back to Dashboard -->
+                <a th:href="@{/dashboard}" class="btn btn-back">Back to Dashboard</a>
+            </div>
         </div>
         
         <div class="grid">
