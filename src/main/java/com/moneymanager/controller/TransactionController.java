@@ -5,7 +5,7 @@ import com.moneymanager.entity.Transaction;
 import com.moneymanager.entity.TransactionType;
 import com.moneymanager.entity.User;
 import com.moneymanager.repository.AccountRepository;
-import com.moneymanager.repository.CategoryRepository; // Naya import
+import com.moneymanager.repository.CategoryRepository;
 import com.moneymanager.repository.TransactionRepository;
 import com.moneymanager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,14 +25,14 @@ public class TransactionController {
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
-    private final CategoryRepository categoryRepository; // Naya dependency
+    private final CategoryRepository categoryRepository;
 
     @GetMapping("/add")
     public String showAddTransactionForm(@AuthenticationPrincipal UserDetails principal, Model model) {
         User user = userRepository.findByEmail(principal.getUsername()).orElseThrow();
         
         model.addAttribute("accounts", accountRepository.findByUserIdAndArchivedFalse(user.getId()));
-        model.addAttribute("categories", categoryRepository.findByUserId(user.getId())); // Categories load ki
+        model.addAttribute("categories", categoryRepository.findByUserId(user.getId()));
         model.addAttribute("transaction", new Transaction());
         
         return "add-transaction";
@@ -42,20 +42,24 @@ public class TransactionController {
     public String saveTransaction(@AuthenticationPrincipal UserDetails principal,
                                   @ModelAttribute Transaction transaction,
                                   @RequestParam Long accountId,
-                                  @RequestParam(required = false) Long categoryId) { // Category ID handle ki
+                                  @RequestParam(required = false) Long categoryId) {
+        
         User user = userRepository.findByEmail(principal.getUsername()).orElseThrow();
         Account account = accountRepository.findById(accountId).orElseThrow();
 
+        // Transaction object ko manually update karein taaki binding error na ho
         transaction.setUser(user);
         transaction.setAccount(account);
         
-        // Category set karna
         if (categoryId != null) {
             transaction.setCategory(categoryRepository.findById(categoryId).orElse(null));
+        } else {
+            transaction.setCategory(null);
         }
         
         transaction.setTransactionDate(LocalDateTime.now());
 
+        // Balance update logic
         if (transaction.getType() == TransactionType.INCOME) {
             account.setCurrentBalance(account.getCurrentBalance().add(transaction.getAmount()));
         } else if (transaction.getType() == TransactionType.EXPENSE) {
