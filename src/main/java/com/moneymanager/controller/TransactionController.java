@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult; // YE IMPORT ZAROORI HAI
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -38,38 +39,38 @@ public class TransactionController {
         return "add-transaction";
     }
 
-  @PostMapping("/add")
-public String saveTransaction(@AuthenticationPrincipal UserDetails principal,
-                              @ModelAttribute("transaction") Transaction transaction,
-                              @RequestParam Long accountId,
-                              @RequestParam(value = "categoryId", required = false) Long categoryId,
-                              BindingResult result) { // BindingResult add kiya
-    
-    if (result.hasErrors()) {
-        System.out.println("Binding Errors: " + result.getAllErrors()); // Logs mein error dikhega
-        return "redirect:/transactions/add?error";
+    @PostMapping("/add")
+    public String saveTransaction(@AuthenticationPrincipal UserDetails principal,
+                                  @ModelAttribute("transaction") Transaction transaction,
+                                  @RequestParam Long accountId,
+                                  @RequestParam(value = "categoryId", required = false) Long categoryId,
+                                  BindingResult result) {
+        
+        if (result.hasErrors()) {
+            return "redirect:/transactions/add?error";
+        }
+
+        User user = userRepository.findByEmail(principal.getUsername()).orElseThrow();
+        Account account = accountRepository.findById(accountId).orElseThrow();
+
+        transaction.setUser(user);
+        transaction.setAccount(account);
+        
+        if (categoryId != null) {
+            transaction.setCategory(categoryRepository.findById(categoryId).orElse(null));
+        }
+        
+        transaction.setTransactionDate(LocalDateTime.now());
+
+        if (transaction.getType() == TransactionType.INCOME) {
+            account.setCurrentBalance(account.getCurrentBalance().add(transaction.getAmount()));
+        } else if (transaction.getType() == TransactionType.EXPENSE) {
+            account.setCurrentBalance(account.getCurrentBalance().subtract(transaction.getAmount()));
+        }
+
+        transactionRepository.save(transaction);
+        accountRepository.save(account);
+
+        return "redirect:/accounts";
     }
-
-    User user = userRepository.findByEmail(principal.getUsername()).orElseThrow();
-    Account account = accountRepository.findById(accountId).orElseThrow();
-
-    transaction.setUser(user);
-    transaction.setAccount(account);
-    
-    if (categoryId != null) {
-        transaction.setCategory(categoryRepository.findById(categoryId).orElse(null));
-    }
-    
-    transaction.setTransactionDate(LocalDateTime.now());
-
-    if (transaction.getType() == TransactionType.INCOME) {
-        account.setCurrentBalance(account.getCurrentBalance().add(transaction.getAmount()));
-    } else if (transaction.getType() == TransactionType.EXPENSE) {
-        account.setCurrentBalance(account.getCurrentBalance().subtract(transaction.getAmount()));
-    }
-
-    transactionRepository.save(transaction);
-    accountRepository.save(account);
-
-    return "redirect:/accounts";
 }
